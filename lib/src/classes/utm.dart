@@ -1,16 +1,16 @@
 class UTM {
-  double easting;
-  double northing;
-  String zoneLetter;
-  int zoneNumber;
-  int accuracy;
+  double? easting;
+  double? northing;
+  String? zoneLetter;
+  int? zoneNumber;
+  int? accuracy;
 
   UTM(
-      {double easting,
-      double northing,
-      String zoneLetter,
-      int zoneNumber,
-      int accuracy})
+      {double? easting,
+      double? northing,
+      String? zoneLetter,
+      int? zoneNumber,
+      int? accuracy})
       : easting = easting,
         northing = northing,
         zoneLetter = zoneLetter,

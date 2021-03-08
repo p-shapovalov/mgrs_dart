@@ -66,7 +66,7 @@ class Mgrs {
   ///    (longitude) and top (latitude) values in WGS84, representing the
   ///    bounding box for the provided MGRS reference.
   ///
-  static List<double> inverse(String mgrs) {
+  static List<double?> inverse(String mgrs) {
     var bbox = UTMtoLL(decode(mgrs.toUpperCase()));
     if (bbox is LonLat) {
       return [bbox.lon, bbox.lat, bbox.lon, bbox.lat];
@@ -80,7 +80,7 @@ class Mgrs {
   ///
   /// Convert MGRS to lat/lon.
   ///
-  static List<double> toPoint(String mgrs) {
+  static List<double?> toPoint(String mgrs) {
     if (mgrs == '') {
       throw Exception('toPoint received a blank string');
     }
@@ -90,7 +90,7 @@ class Mgrs {
     if (bbox is LonLat) {
       return [bbox.lon, bbox.lat];
     } else if (bbox is BBox) {
-      return [(bbox.left + bbox.right) / 2, (bbox.top + bbox.bottom) / 2];
+      return [(bbox.left! + bbox.right!) / 2, (bbox.top! + bbox.bottom!) / 2];
     } else {
       throw Exception('Neither bbox, nor lonlat');
     }
@@ -138,18 +138,18 @@ class Mgrs {
   ///
   static String encode(UTM utm, accuracy) {
     // prepend with leading zeroes
-    var seasting = '00000${utm.easting.truncate()}';
-    var snorthing = '00000${utm.northing.truncate()}';
+    var seasting = '00000${utm.easting!.truncate()}';
+    var snorthing = '00000${utm.northing!.truncate()}';
     var seastingWithAccuracy =
         seasting.substring(seasting.length - 5, seasting.length);
-    seastingWithAccuracy =
-        seastingWithAccuracy.substring(seastingWithAccuracy.length - accuracy);
+    seastingWithAccuracy = seastingWithAccuracy
+        .substring(seastingWithAccuracy.length - accuracy as int);
     var snorthingWithAccuracy =
         snorthing.substring(snorthing.length - 5, snorthing.length);
     snorthingWithAccuracy = snorthingWithAccuracy
-        .substring(snorthingWithAccuracy.length - accuracy);
+        .substring(snorthingWithAccuracy.length - accuracy as int);
     var value =
-        '${utm.zoneNumber}${utm.zoneLetter}${get100kID(utm.easting, utm.northing, utm.zoneNumber)}$seastingWithAccuracy$snorthingWithAccuracy';
+        '${utm.zoneNumber}${utm.zoneLetter}${get100kID(utm.easting!, utm.northing!, utm.zoneNumber!)}$seastingWithAccuracy$snorthingWithAccuracy';
     return value;
   }
 
@@ -387,7 +387,7 @@ class Mgrs {
   ///     for.
   /// @return {string} The letter designator.
   ///
-  static String getLetterDesignator(double latitude) {
+  static String? getLetterDesignator(double latitude) {
     if (latitude <= 84 && latitude >= 72) {
       // the X band is 12 degrees high
       return 'X';
@@ -425,7 +425,7 @@ class Mgrs {
     var UTMNorthing = utm.northing;
     var UTMEasting = utm.easting;
     var zoneLetter = utm.zoneLetter;
-    var zoneNumber = utm.zoneNumber;
+    var zoneNumber = utm.zoneNumber!;
     // check the ZoneNummber is valid
     if (zoneNumber < 0 || zoneNumber > 60) {
       return null;
@@ -435,22 +435,22 @@ class Mgrs {
     const eccSquared = 0.00669438; //ellip.eccsq;
     var e1 = (1 - math.sqrt(1 - eccSquared)) / (1 + math.sqrt(1 - eccSquared));
     // remove 500,000 meter offset for longitude
-    var x = UTMEasting - 500000;
+    var x = UTMEasting! - 500000;
     var y = UTMNorthing;
     // We must know somehow if we are in the Northern or Southern
     // hemisphere, this is the only time we use the letter So even
     // if the Zone letter isn't exactly correct it should indicate
     // the hemisphere correctly
-    if (ALPHABET.indexOf(zoneLetter.toLowerCase()) <
+    if (ALPHABET.indexOf(zoneLetter!.toLowerCase()) <
         ALPHABET.indexOf('N'.toLowerCase())) {
-      y -= 10000000; // remove 10,000,000 meter offset used
+      y = y! - 10000000; // remove 10,000,000 meter offset used
       // for southern hemisphere
     }
     // There are 60 zones with zone 1 being at West -180 to -174
     var LongOrigin = (zoneNumber - 1) * 6 - 180 + 3; // +3 puts origin
     // in middle of zone
     var eccPrimeSquared = (eccSquared) / (1 - eccSquared);
-    var M = y / k0;
+    var M = y! / k0;
     var mu = M /
         (a *
             (1 -
@@ -511,8 +511,8 @@ class Mgrs {
     if (utm.accuracy != null) {
       var topRight = UTMtoLL(
         UTM(
-          easting: utm.easting + utm.accuracy,
-          northing: utm.northing + utm.accuracy,
+          easting: utm.easting! + utm.accuracy!,
+          northing: utm.northing! + utm.accuracy!,
           zoneLetter: utm.zoneLetter,
           zoneNumber: utm.zoneNumber,
           accuracy: null,
