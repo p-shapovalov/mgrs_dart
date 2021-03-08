@@ -106,7 +106,6 @@ class Mgrs {
   /// @return {string} the MGRS string for the given location and accuracy.
   ///
   static String forward(List<double> ll, int accuracy) {
-    accuracy ??= 5;
     if (ll.length != 2) {
       throw Exception(
           'forward received an invalid input: array must contain 2 numbers exactly');
